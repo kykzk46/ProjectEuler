@@ -1,4 +1,6 @@
-from decimal import *
+# Point of interest
+# operator // perform integer division
+
 
 def cal_sum_multiple(n_max, multiple):
     start = 0
@@ -13,12 +15,11 @@ def cal_sum_multiple(n_max, multiple):
     # = (0+1+2+...+w)*multiple
     # = (w(w+1)/2)*multiple
     # = (start/multiple) * ((start/multiple)+1) * (multiple/2)
-    getcontext().prec = 16
-    return  Decimal(start * start / multiple + start ) /2 
+    return (start * start // multiple + start) // 2
 
 
 if __name__ == '__main__':
-    with open('./data/input/input05.txt', 'r') as fileObj:
+    with open('../data/input/input05.txt', 'r') as fileObj:
         t = int(fileObj.readline())
         for case in range(0, t, 1):
             n = int(fileObj.readline())
@@ -33,7 +34,6 @@ if __name__ == '__main__':
             sum = sum_of_multiple3 + sum_of_multiple5 - sum_of_multiple15
 
             print(int(sum))
-
 
 
 
