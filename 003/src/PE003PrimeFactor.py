@@ -36,12 +36,12 @@ def LargestPrimeFactor(n_target):
             if(n%i == 0):
                 n = n//i
                 factor.append(i)
-                break;
+                break
 
         
         if(last_i == up_limit): # no factor in [3,5,...,uplimit]
             factor.append(n)
-            break;
+            break
             
     #print(factor)
     factor.sort()
