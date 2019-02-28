@@ -1,46 +1,76 @@
 import math
 import os
 from os import path
+import numpy as np
+import matplotlib.pyplot as plt
 
-from bisect import bisect_left as bl
-from functools import reduce
+def Visualize(n):
+    vertexes = np.zeros((n+1,2))
+    for k in range(0,n,1):
+        vertexes[k,0] = np.cos((2*k-1)*np.pi / n)
+        vertexes[k,1] = np.sin((2*k-1)*np.pi / n) 
 
-def FindAllPrimeWintin(n_upbound):
-    arr = [2]
-    isPrime = True
-    for i in range(3,n_upbound+1,2):
-        for j in range (3,i,1):
-            if(i % j == 0):
-                isPrime = False
-                break
-        if(isPrime):
-            arr.append(i)
-        isPrime = True
-    
-    return arr
+    # for plotting purpose, the last index (extra one) is the same as the first
+    vertexes[n,:] = vertexes[0,:]
+
+    plt.plot(vertexes[:,0], vertexes[:,1], marker = 'o')
+    plt.show()
+    return 0
 
 
-def FindSmallestMultiple(n_target, primeArr):
-    intersec = bl(primeArr, n_target)
-    primeArrWithin = [val for val in primeArr[0:intersec+1] if val <= n_target]
-    if(len(primeArrWithin) == 0):
-        return 1
-    primeProduct = reduce((lambda x,y: x*y), primeArrWithin)
-    
-    
-    counter = 0
-    p = primeProduct
-    allDivisible = False
-    while(not allDivisible):
-        counter += 1
-        p = primeProduct * counter
-        allDivisible = True
-        for j in range (2,n_target+1,1):
-            if(p % j != 0):
-                allDivisible = False
-                break
 
-    return p
+def VisualizeSum(start, end):
+
+    for n in range(start, end, 1):
+        small = n
+        large = n+1
+
+
+        n_small = small 
+        vertexes_small = np.zeros((n_small+1,2))
+        for k in range(0,n_small,1):
+            vertexes_small[k,0] = np.cos((2*k-1)*np.pi / n_small)
+            vertexes_small[k,1] = np.sin((2*k-1)*np.pi / n_small)
+        vertexes_small[n_small,:] = vertexes_small[0,:]
+        plt.plot(vertexes_small[:,0], vertexes_small[:,1], marker = 'o')
+        
+        
+        n_large = large 
+        vertexes_large = np.zeros((n_large+1,2))
+        for k in range(0,n_large,1):
+            vertexes_large[k,0] = np.cos((2*k-1)*np.pi / n_large)
+            vertexes_large[k,1] = np.sin((2*k-1)*np.pi / n_large)
+        vertexes_large[n_large,:] = vertexes_large[0,:]
+        plt.plot(vertexes_large[:,0], vertexes_large[:,1], marker = 'o')
+
+
+        n_mSum = n_small * n_large
+        vertexes_mSum = np.zeros((n_mSum +1, 2))
+        idx = 0
+        for i in range(0, n_small, 1):
+            for j in range(0, n_large, 1):
+                vertexes_mSum[idx,0] = vertexes_small[i,0] + vertexes_large[j,0]
+                vertexes_mSum[idx,1] = vertexes_small[i,1] + vertexes_large[j,1]
+                idx = idx + 1
+        vertexes_mSum[n_mSum,:] = vertexes_mSum[0,:]
+
+        #print(vertexes_mSum[:,0])
+        plt.scatter(vertexes_mSum[:,0], vertexes_mSum[:,1], marker = 'D')
+
+        plt.axis([-2,2,-2,2])
+        plt.show()
+    return 0
+
+
+
+
+
+
+
+
+
+
+
 
 
 """
@@ -54,13 +84,19 @@ if __name__ == '__main__':
     print("=============================================")
 
 
-    input_path = os.path.normpath(os.path.join(dir_path, "data\input\input04.txt"))
+    input_path = os.path.normpath(os.path.join(dir_path, "data\input\input00.txt"))
     with open(input_path, 'r') as fileObj:
-        t = int(fileObj.readline())
-        for case in range(0, t, 1):
-            n = int(fileObj.readline())
+        q= int(fileObj.readline())
+        for case in range(0, q, 1):
+            strInput = str(fileObj.readline()).split(' ')
+            l = int(strInput[0])
+            r = int(strInput[1])
+            print(l,r)
 
-            upbound = 40
-            rst = FindSmallestMultiple(n, FindAllPrimeWintin(upbound))
+            #Visualize(l)
+            #Visualize(r)
 
-            print(rst)
+
+            VisualizeSum(l,r)
+
+            #print(rst)
