@@ -4,58 +4,94 @@ from os import path
 import numpy as np
 import matplotlib.pyplot as plt
 
-def Visualize(n):
-    vertexes = np.zeros((n+1,2))
-    for k in range(0,n,1):
-        vertexes[k,0] = np.cos((2*k-1)*np.pi / n)
-        vertexes[k,1] = np.sin((2*k-1)*np.pi / n) 
+def CalculateVertex(n):
+    vertexes = np.zeros((n+1,4))
 
-    # for plotting purpose, the last index (extra one) is the same as the first
-    vertexes[n,:] = vertexes[0,:]
+    for k in range(1,n+1,1):
+        vertexes[k,3] = phi = (2*k-1)*180 / n
+        vertexes[k,0] = np.cos(phi * np.pi / 180)
+        vertexes[k,1] = np.sin(phi * np.pi / 180) 
+        vertexes[k,2] = np.sqrt(vertexes[k,0] * vertexes[k,0] + vertexes[k,1] * vertexes[k,1])
 
-    plt.plot(vertexes[:,0], vertexes[:,1], marker = 'o')
-    plt.show()
-    return 0
+    # for plotting purpose, the first index (extra one) is the same as the last 
+    vertexes[0,:] = vertexes[n,:]
+    return vertexes
+
+
+def CalculateMinkowskiSum(n1, vtx1, n2, vtx2):
+    n_mSum = n1 * n2
+    vtx_rst = np.zeros((n_mSum +1, 4))
+    idx = 1
+    for i in range(1, n1+1, 1):
+
+        r1_sqr = vtx1[i,0] * vtx1[i,0] + vtx1[i,1] * vtx1[i,1]
+        r1 = np.sqrt(r1_sqr)
+        phi1 = vtx1[i,3]
+
+        for j in range(1, n2+1, 1):
+            vtx_rst[idx,0] = vtx1[i,0] + vtx2[j,0]
+            vtx_rst[idx,1] = vtx1[i,1] + vtx2[j,1]
+
+            r2_sqr = vtx2[j,0] * vtx2[j,0] + vtx2[j,1] * vtx2[j,1]
+            r2 = np.sqrt(r2_sqr)
+            phi2 = vtx2[j,3]
+
+            # radius
+            phi_minus = (phi2-phi1)*np.pi/180 
+            vtx_rst[idx,2] = np.sqrt( r1_sqr + r2_sqr + 2 * r1 * r2 * np.cos(phi_minus) )
+            # angle
+            vtx_rst[idx,3] = phi1 +  np.arctan2( r2*np.sin(phi_minus), r1 + r2*np.cos(phi_minus) ) * 180 / np.pi
+
+            # x, y check
+            x = vtx_rst[idx,2] * np.cos(vtx_rst[idx,3]*np.pi / 180)
+            y = vtx_rst[idx,2] * np.sin(vtx_rst[idx,3]*np.pi / 180)
+
+            idx = idx + 1
+    vtx_rst[0,:] = vtx_rst[n_mSum,:]
+    return vtx_rst
+
+
+def FindNextVertexes(vtx_in, plt):
+    row = vtx_in.shape[0] - 1 # exclude the extra first index
+    
+    idx_total = int((row+1)/2) 
+    vtx = vtx_in[1:idx_total +1 ,:]
+
+    vtx_new = vtx[vtx[:,2].argsort()[::-1]] # [::-1] do a reverse 
+    
+    for i in range(0, idx_total-2, 1):
+        x= [vtx_new[i,0],vtx_new[i+1,0]]
+        y= [vtx_new[i,1],vtx_new[i+1,1]]
+        plt.plot(x,y)
+
+    
+    vtx_rst = vtx
+
+
+    return vtx_rst
+
 
 
 
 def VisualizeSum(start, end):
 
     for n in range(start, end, 1):
-        small = n
-        large = n+1
+        n_small = n
+        n_large = n+1
 
-
-        n_small = small 
-        vertexes_small = np.zeros((n_small+1,2))
-        for k in range(0,n_small,1):
-            vertexes_small[k,0] = np.cos((2*k-1)*np.pi / n_small)
-            vertexes_small[k,1] = np.sin((2*k-1)*np.pi / n_small)
-        vertexes_small[n_small,:] = vertexes_small[0,:]
+        vertexes_small = CalculateVertex(n_small) 
         plt.plot(vertexes_small[:,0], vertexes_small[:,1], marker = 'o')
         
-        
-        n_large = large 
-        vertexes_large = np.zeros((n_large+1,2))
-        for k in range(0,n_large,1):
-            vertexes_large[k,0] = np.cos((2*k-1)*np.pi / n_large)
-            vertexes_large[k,1] = np.sin((2*k-1)*np.pi / n_large)
-        vertexes_large[n_large,:] = vertexes_large[0,:]
+        vertexes_large = CalculateVertex(n_large) 
         plt.plot(vertexes_large[:,0], vertexes_large[:,1], marker = 'o')
 
 
-        n_mSum = n_small * n_large
-        vertexes_mSum = np.zeros((n_mSum +1, 2))
-        idx = 0
-        for i in range(0, n_small, 1):
-            for j in range(0, n_large, 1):
-                vertexes_mSum[idx,0] = vertexes_small[i,0] + vertexes_large[j,0]
-                vertexes_mSum[idx,1] = vertexes_small[i,1] + vertexes_large[j,1]
-                idx = idx + 1
-        vertexes_mSum[n_mSum,:] = vertexes_mSum[0,:]
-
-        #print(vertexes_mSum[:,0])
+        vertexes_mSum = CalculateMinkowskiSum(n_small, vertexes_small, n_large, vertexes_large)
+        print(vertexes_mSum)
         plt.scatter(vertexes_mSum[:,0], vertexes_mSum[:,1], marker = 'D')
+
+        vert_next = FindNextVertexes(vertexes_mSum, plt)
+
 
         plt.axis([-2,2,-2,2])
         plt.show()
