@@ -3,9 +3,12 @@ import os
 from os import path
 import numpy as np
 
-def FindSmallestDivisor(oddNumber):
+def FindSmallestDivisor(oddNumber, startFrom, endBefore):
     upLimit = math.floor(math.sqrt(oddNumber))
-    for i in range (3,upLimit+1,2):
+    if(endBefore < upLimit):
+        upLimit = endBefore
+    
+    for i in range (startFrom, upLimit + 1, 2):
         if oddNumber % i == 0:
             return i
     return 1
@@ -38,8 +41,10 @@ def TestPerfectQuotion(k):
     oddDivisor = j
     od_list = []
     upLimit = math.ceil(math.sqrt(k))
+    startFrom = 3
+    endBefore = math.ceil(math.sqrt(oddDivisor))
     while(True):
-        o1 = FindSmallestDivisor(oddDivisor) 
+        o1 = FindSmallestDivisor(oddDivisor, startFrom, endBefore) 
         if(o1 == 1): 
             break
         o2 = oddDivisor / o1
@@ -54,7 +59,9 @@ def TestPerfectQuotion(k):
                 od_list.append(t)
 
         oddDivisor = o2
-        lastSmallDivisor = o1
+        startFrom = o1
+        endBefore = o2
+
 
     # Form other even divisors
     other_list = []
@@ -107,7 +114,7 @@ if __name__ == '__main__':
         q= int(fileObj.readline())
         print(q)
 
-        for k in range(10, 1000000 + 1, 2): # n must be even
+        for k in range(10, 10000000 + 1, 2): # n must be even
             PQ = TestPerfectQuotion(k)
             if(math.fmod(PQ * 2 - 1, 2) == 0):
                 print("{0}, {1}".format(k, PQ))
