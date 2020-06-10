@@ -1,1 +1,5 @@
 .idea/
+*.VC.db
+[Dd]ebug/
+[Rr]elease/
+.vs/
